@@ -38,6 +38,7 @@ Function Send-EMail {
     $SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
     $SMTPClient.EnableSsl = $false
     $SMTPClient.Port = 465
+    $SMTPClient.IsBodyHtml = 1
     $SMTPClient.Credentials = New-Object System.Net.NetworkCredential($EmailFrom.Split("@")[0], $Password); 
     $SMTPClient.Send($SMTPMessage)
     Remove-Variable -Name SMTPClient

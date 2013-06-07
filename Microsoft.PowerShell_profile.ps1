@@ -299,14 +299,14 @@ function MPListFileModifiedTime
     }
 }
 
-Import-Module C:\Users\Kordan\Documents\WindowsPowerShell\f4f246c5c1291e80112a\MarkdownSharp.dll
+Import-Module C:\Users\Kordan\Documents\WindowsPowerShell\MarkdownSharp.dll
 function Markdown-ToHtml($item, 
                          $AutoHyperlink = $False,
                          $AutoNewLines = $False,
                          $LinkEmails = $False,
                          $EncodeProblemUrlCharacters = $False)
 {
-  $css = "C:\Users\Kordan\Documents\WindowsPowerShell\f4f246c5c1291e80112a\Markdown.css"
+  $css = "C:\Users\Kordan\Documents\WindowsPowerShell\Markdown.css"
 
   $mo = New-Object MarkdownSharp.MarkdownOptions
   $mo.AutoHyperlink               = $AutoHyperlink
@@ -369,7 +369,7 @@ $global:MP = "C:\MassProductionKit\MPPackageManager"
 $global:UTL = "C:\MassProductionKit\Utility"
 
 
-Import-Module SendMailSTMP
+Import-Module SendMailSMTP
 
 chcp 950
 cd $TRUNK
