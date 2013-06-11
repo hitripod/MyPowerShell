@@ -343,6 +343,26 @@ function Win8Inf2Cat
     & "C:\Program Files (x86)\Windows Kits\8.0\bin\x64\inf2cat.exe" /driver:$inf_dir /os:8_X64
 }
 
+function notify
+{
+    $ic = $args[0]
+    $interface = $args[1]
+    $to = if ([string]::IsNullOrEmpty($args[2])) { "kordan" } else { $args[2] }
+
+    $release = "172.21.72.3:9000/ReleaseNotes/"
+    $passwd = (cat "C:\Users\Kordan\Documents\WindowsPowerShell\temp") 
+    $body +="<pre>
+        The <B>$ic $interface</B> MP Kit is released, please check out 
+        the following <a href=`"$release`">release note</a> and download it from the url.
+
+        \\172.21.72.2\rtl$ic\$interface\MP
+        [Username]: <I>cnfae</I>
+        [Passwd]:   <I>rtfae!123</I>
+        </pre>"
+    $body += (cat "C:\MassProductionKit\MPPackageManager\Configuration\$ic\$interface\Doc\Release.html")
+    Send-EMail -To $to -Subject "Release $ic $interface MP Kit" -Body "$body" -password $passwd
+}
+
 set-alias open explorer
 set-alias vi vim
 Set-Alias -name 'win8sign'      -value 'Win8Inf2Cat'
