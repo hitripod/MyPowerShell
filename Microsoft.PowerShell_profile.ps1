@@ -246,7 +246,7 @@ function MaskEfuse
 
 function RevBuild
 {
-    &"C:\Ruby192\DevKit\bin\perl.exe" "C:\MassProductionKit\Utility\RevisionBuild.pl"  $args
+    &"C:\Perl64\bin\perl.exe" "C:\MassProductionKit\Utility\RevisionBuild.pl"  $args
 }
 
 function ln
@@ -340,7 +340,7 @@ function tgit
 function Win8Inf2Cat
 {
     $inf_dir = $args[0]
-    & "C:\Program Files (x86)\Windows Kits\8.0\bin\x64\inf2cat.exe" /driver:$inf_dir /os:8_X64
+    & "C:\Program Files (x86)\Windows Kits\8.1\bin\x64\inf2cat.exe" /driver:$inf_dir /os:8_X64
 }
 
 function notify
