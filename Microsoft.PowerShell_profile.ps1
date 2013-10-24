@@ -81,7 +81,7 @@ function cd {
     }
     else { 
         set-location "$args";
-    $global:PWD = pwd; 
+        $global:PWD = pwd; 
         for ($i = ($l - 1); $i -ge 0; $i--) { 
             if ($global:PWD -eq $CDHIST[$i]) {
                 $global:CDHIST.RemoveAt($i);
@@ -347,7 +347,15 @@ function notify
 {
     $ic = $args[0]
     $interface = $args[1]
-    $to = if ([string]::IsNullOrEmpty($args[2])) { "kordan" } else { $args[2] }
+    $receivers = new-object 'System.Collections.Generic.List[string]'
+    if ([string]::IsNullOrEmpty($args[2])) { 
+        $receivers.Add("kordan");
+        $receivers.Add("mida");
+    } else { 
+        for ($i = 2; $i -lt $args.Length ; $i++) {
+            $receivers.Add($args[$i]);
+        }
+    }
 
     $release = "172.21.72.3:9000/ReleaseNotes/"
     $passwd = (cat "C:\Users\Kordan\Documents\WindowsPowerShell\temp") 
@@ -360,7 +368,10 @@ function notify
         [Passwd]:   <I>rtfae!123</I>
         </pre>"
     $body += (cat "C:\MassProductionKit\MPPackageManager\Configuration\$ic\$interface\Doc\Release.html")
-    Send-EMail -To $to -Subject "Release $ic $interface MP Kit" -Body "$body" -password $passwd
+
+    foreach ($to in $receivers) {
+        Send-EMail -To $to -Subject "Release $ic $interface MP Kit" -Body "$body" -password $passwd
+    }
 }
 
 set-alias open explorer
