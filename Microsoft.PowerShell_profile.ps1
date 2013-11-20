@@ -343,6 +343,29 @@ function Win8Inf2Cat
     & "C:\Program Files (x86)\Windows Kits\8.1\bin\x64\inf2cat.exe" /driver:$inf_dir /os:8_X64
 }
 
+function SignOnSMSOTP
+{
+    $winrar = "C:\Program Files\WinRAR\winrar.exe"
+    $zipName = "sign" + [DateTime]::Now.ToString("yyyyMMdd-HHmmss") + ".zip"
+    $sysDir = $args[0]
+    $srcDir = $args[0]+"\..\..\"
+    $dstDir = $srcDir
+    $zipSrc = $srcDir + $zipName
+    $zipDst = $dstDir + $zipName
+    $sikuliIDE = "C:\Program Files (x86)\Sikuli X\Sikuli-IDE.bat"
+    $sikuliScript = "C:\Users\Kordan\Desktop\SignDriver.skl"
+    $downloadDir = "H:\Downloads"
+    $downloadZip = "H:\Downloads\" + $zipName
+
+    & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
+    & "$sikuliIDE" -r  "$sikuliScript" --args None $zipSrc $zipDst
+    if (($strResponse = Read-Host "Sikuli Done? (Y/N)") -ine "N") {
+        cp $downloadZip $ZipDst
+        & "$winrar" e "$zipDst" "$sysDir"
+        open $srcDir
+    }
+}
+
 function notify
 {
     $ic = $args[0]
@@ -377,6 +400,7 @@ function notify
 set-alias open explorer
 set-alias vi vim
 Set-Alias -name 'win8sign'      -value 'Win8Inf2Cat'
+Set-Alias -name 'smsotp'        -value 'SignOnSMSOTP'
 Set-Alias -name 'ddk'           -value 'DDKEnvSet'
 Set-Alias -name 'cwd'           -value 'Push-Location'
 Set-Alias -name 'cwd'           -value 'Push-Location'
