@@ -173,6 +173,38 @@ function GetLogTemplate
     & echo $final | clip
 }
 
+function ListAllLabeledCommits
+{
+    Param(
+            [Parameter(Mandatory=$True,Position=1)]
+            [string]$wanted="2010",     
+            [Parameter(Mandatory=$False)]
+            [string]$range=200
+         ) 
+
+    $log = (git log HEAD~$range..HEAD)
+
+    $match_beta = ".*BETA_[vV](\d{1,2}[.]{0,1}\d{0,2}).*"
+    $match_ver = "\d{4,4}[.]\d{1,2}[.]\d{4,}[.]\d{4,4}"
+    $match_detail = "\s+.*$match_ver "
+
+    $labeledCommits = $log -Match $match_detail
+
+    $matchedLabels = @()
+    foreach ( $l in $labeledCommits) {
+        $ver_driver = $l -replace ".*($match_ver).*", '$1'
+        $ver_beta = $l -replace $match_beta , '$1'
+        if ($ver_driver -like "$wanted.*" ) {
+            $label = New-Object PSObject -Property @{ DriverVersion=$ver_driver ; BetaVersion=$ver_beta }
+            $matchedLabels += $label
+        }
+    }
+    $matchedLabels | Sort-Object DriverVersion, BetaVersion | ForEach-Object {
+        $label = $_.DriverVersion + " BETA_v" + $_.BetaVersion 
+        Write-Host $label
+    }
+}
+
 #-----------------------------------------------------------------------------
 # Save the command history across sessions
 #-----------------------------------------------------------------------------
@@ -440,6 +472,7 @@ Set-Alias -name 'gg'            -value 'gvim'
 Set-Alias -name 'md2html'       -value 'Markdown-ToHtml'
 Set-Alias -name 'ml'            -value 'MPListFileModifiedTime'
 Set-Alias -name 'gl'            -value 'GetLogTemplate'
+Set-Alias -name 'labeled'       -value 'ListAllLabeledCommits'
 
 Set-Alias cd  C:\Users\Kordan\Documents\WindowsPowerShell\Change-Directory.ps1
 Set-Alias mpm C:\MassProductionKit\MPPackageManager\MPManager.ps1
