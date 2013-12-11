@@ -161,15 +161,24 @@ function GetLogTemplate
     $backoff = 1
     do {
         $log = (git log HEAD~$backoff..HEAD) | Out-String
-        $status = $log -match "(?sm)[\r\n]{4,}.*(?<begin>[^\s]*)[vV](?<version>\d{1,5})(?<beforeDate>.*_)(?<date>20\d\d_\d{1,2}_\d{1,2})(?<afterDate>_[^\s]*)(?<content>.*)\s[-]{6,}"
+        $status = $log -match "(?sm)[\r\n]{4,}\s*(?<begin>[^\s]*)[vV](?<version>\d{1,5})(?<beforeDate>.*_)(?<date>20\d\d_\d{1,2}_\d{1,2})(?<afterDate>_[^\s]*)(?<content>.*)\s[-]{6,}"
         $backoff += 1
     } while ( ! $status)
 
     $version = [int]$matches["version"] + 1
     $template_content = "`r`n`r`n--------------------------------------------------------------------------`r`n"
-    $template_content += "<" + $(Get-Date -format "MM/dd/yyyy hh:mm") + " Kordan>`
-    Added Files:`r`nModified Files:`r`n`r`nChange Notes:`r`n`t1.`r`nVerification Before Checked-In:`r`n`t1. "
-    $final = ($matches["begin"] -replace "\s", "") + "v$version" + $matches["beforeDate"] + $date + "_" + $template_content
+    $template_content += "<" + $(Get-Date -format "MM/dd/yyyy HH:mm") + " Kordan>`
+Added Files:`r`nModified Files:`r`n`r`nChange Notes:`r`n`t1.`r`nVerification Before Checked-In:`r`n`t1. "
+    if ($args[0] -eq "ci") {
+        $final = ($matches["begin"] -replace "\s", "") + "v$version" + $matches["beforeDate"] + $date + "_"
+    } elseif ($args[0] -eq "doc") {
+        $template_content = "--------------------------------------------------------------------------`r`n"
+        $template_content += "<" + $(Get-Date -format "MM/dd/yyyy HH:mm") + " Kordan>`
+Added Files:`r`nModified Files:`r`n`r`nChange Notes:`r`n`t1.`r`nVerification Before Checked-In:`r`n`t1. "
+        $final = $template_content
+    } else {
+        $final = ($matches["begin"] -replace "\s", "") + "v$version" + $matches["beforeDate"] + $date + "_" + $template_content
+    } 
     & echo $final | clip
 }
 
@@ -200,7 +209,7 @@ function ListAllLabeledCommits
         }
     }
     $matchedLabels | Sort-Object DriverVersion, BetaVersion | ForEach-Object {
-        $label = $_.DriverVersion + " BETA_v" + $_.BetaVersion 
+        $label = $_.DriverVersion + " BETA_V" + $_.BetaVersion 
         Write-Host $label
     }
 }
