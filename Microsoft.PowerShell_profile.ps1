@@ -151,6 +151,27 @@ function MPBuild($ic, $type) {
 #        -and $(cd (Get-Location -PSProvider FileSystem).ProviderPath) -and $(mpbuild all) -and $(exit)
 }
 
+function GetLogTemplate
+{
+
+    #$log = (svn log -r COMMITTED) | Out-String
+    $d = Get-Date
+    $date = [string]$d.Year + "_" + [string]$d.Month + "_" + [string]$d.Day
+
+    $backoff = 1
+    do {
+        $log = (git log HEAD~$backoff..HEAD) | Out-String
+        $status = $log -match "(?sm)[\r\n]{4,}.*(?<begin>[^\s]*)[vV](?<version>\d{1,5})(?<beforeDate>.*_)(?<date>20\d\d_\d{1,2}_\d{1,2})(?<afterDate>_[^\s]*)(?<content>.*)\s[-]{6,}"
+        $backoff += 1
+    } while ( ! $status)
+
+    $version = [int]$matches["version"] + 1
+    $template_content = "`r`n`r`n--------------------------------------------------------------------------`r`n"
+    $template_content += "<" + $(Get-Date -format "MM/dd/yyyy hh:mm") + " Kordan>`
+    Added Files:`r`nModified Files:`r`n`r`nChange Notes:`r`n`t1.`r`nVerification Before Checked-In:`r`n`t1. "
+    $final = ($matches["begin"] -replace "\s", "") + "v$version" + $matches["beforeDate"] + $date + "_" + $template_content
+    & echo $final | clip
+}
 
 #-----------------------------------------------------------------------------
 # Save the command history across sessions
@@ -340,7 +361,7 @@ function tgit
 function Win8Inf2Cat
 {
     $inf_dir = $args[0]
-    & "C:\Program Files (x86)\Windows Kits\8.1\bin\x64\inf2cat.exe" /driver:$inf_dir /os:8_X64
+    & "C:\Program Files (x86)\Windows Kits\8.1\bin\x86\inf2cat.exe" /driver:$inf_dir /os:8_X64
 }
 
 function SignOnSMSOTP
@@ -356,6 +377,7 @@ function SignOnSMSOTP
     $sikuliScript = "C:\Users\Kordan\Desktop\SignDriver.skl"
     $downloadDir = "H:\Downloads"
     $downloadZip = "H:\Downloads\" + $zipName
+    $backup = "H:\Downloads\" + $zipName
 
     & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
     & "$sikuliIDE" -r  "$sikuliScript" --args None $zipSrc $zipDst
@@ -363,6 +385,10 @@ function SignOnSMSOTP
         cp $downloadZip $ZipDst
         & "$winrar" e "$zipDst" "$sysDir"
         open $srcDir
+        if (($strResponse = Read-Host "Enter the file name to archive('q' to quit):") -ine "N") {
+            $zipSrc = $srcDir + $strResponse + ".zip"
+            & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
+        }
     }
 }
 
@@ -397,6 +423,8 @@ function notify
     }
 }
 
+Remove-Item alias:ls
+Remove-Item alias:gl -Force
 set-alias open explorer
 set-alias vi vim
 Set-Alias -name 'win8sign'      -value 'Win8Inf2Cat'
@@ -411,8 +439,8 @@ Set-Alias -name 'mask'          -value 'MaskEfuse'
 Set-Alias -name 'gg'            -value 'gvim'
 Set-Alias -name 'md2html'       -value 'Markdown-ToHtml'
 Set-Alias -name 'ml'            -value 'MPListFileModifiedTime'
+Set-Alias -name 'gl'            -value 'GetLogTemplate'
 
-Remove-Item alias:ls 
 Set-Alias cd  C:\Users\Kordan\Documents\WindowsPowerShell\Change-Directory.ps1
 Set-Alias mpm C:\MassProductionKit\MPPackageManager\MPManager.ps1
 
