@@ -156,7 +156,7 @@ function GetLogTemplate
 
     #$log = (svn log -r COMMITTED) | Out-String
     $d = Get-Date
-    $date = [string]$d.Year + "_" + [string]$d.Month + "_" + [string]$d.Day
+    $date = Get-Date -format "yyyy_MM_dd"
 
     $backoff = 1
     do {
