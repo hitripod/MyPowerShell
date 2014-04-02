@@ -286,6 +286,29 @@ function TestBuild
     CheckDriverBinary $driver "Normal"
 }
 
+function FreeBuildAll
+{
+    $driver  = "C:\WLAN\Trunk.git"
+    $build_x86 = 'C:\WINDDK\3790~1.183\bin\setenv.bat C:\WINDDK\3790~1.183 fre WXP && cd '+ $driver + "&& buildcleanall && buildrtwe"
+    $build_x64 = 'C:\WINDDK\3790~1.183\bin\setenv.bat C:\WINDDK\3790~1.183 fre AMD64 WNET && cd '+ $driver + "&& buildrtwe"
+    $buildWin7_x86 = 'C:\WinDDK\7600.16385.0\bin\setenv.bat C:\WinDDK\7600.16385.0 fre x86 WIN7 && cd '+ $driver + "&& buildrtwe"
+    $buildWin7_x64 = 'C:\WinDDK\7600.16385.0\bin\setenv.bat C:\WinDDK\7600.16385.0 fre x64 WIN7 && cd '+ $driver + "&& buildrtwe"
+    
+    $buildall_x86  = "$build_x86 && $build_x64 && exit"
+    C:\Windows\System32\cmd.exe /k $buildall_x86
+    $buildall_x64  = "$buildWin7_x86 && $buildWin7_x64 + && exit"
+    C:\Windows\System32\cmd.exe /k $buildall_x64
+    
+    powershell
+    $build_Win81x86 = '""C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat"" amd64 && cd '+ $driver + "&& setenv-for-windows-msbuild-system.bat -h 8.1 -t 32 -os 8.1 -d fre "
+    C:\Windows\System32\cmd.exe /k $build_Win81x86
+    
+    powershell
+    $build_Win81x64 = '""C:\Program Files (x86)\Microsoft Visual Studio 11.0\VC\vcvarsall.bat"" amd64 && cd '+ $driver + "&& setenv-for-windows-msbuild-system.bat -h 8.1 -t 64 -os 8.1 -d fre "
+    C:\Windows\System32\cmd.exe /k $build_Win81x64
+}
+
+
 function ReplaceDriver
 {
     & "C:\MassProductionKit\MPTool\MPTool\ReplaceDriver.bat" $args[0]
@@ -405,32 +428,44 @@ function Win8Inf2Cat
     & "C:\Program Files (x86)\Windows Kits\8.1\bin\x86\inf2cat.exe" /driver:$inf_dir /os:8_X64
 }
 
+Import-Module SMSOTP
 function SignOnSMSOTP
 {
     $winrar = "C:\Program Files\WinRAR\winrar.exe"
-    $zipName = "sign" + [DateTime]::Now.ToString("yyyyMMdd-HHmmss") + ".zip"
+    $filename = "signed" + (get-date -format "yyyyMMhhmm-ss")
+    $zipName = "$filename.zip"
     $sysDir = $args[0]
     $srcDir = $args[0]+"\..\..\"
     $dstDir = $srcDir
     $zipSrc = $srcDir + $zipName
-    $zipDst = $dstDir + $zipName
+    $zipDst = "H:\$filename.zip"
     $sikuliIDE = "C:\Program Files (x86)\Sikuli X\Sikuli-IDE.bat"
     $sikuliScript = "C:\Users\Kordan\Desktop\SignDriver.skl"
     $downloadDir = "H:\Downloads"
     $downloadZip = "H:\Downloads\" + $zipName
     $backup = "H:\Downloads\" + $zipName
+    $passwd = (cat "C:\Users\Kordan\Documents\WindowsPowerShell\temp") 
 
-    & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
-    & "$sikuliIDE" -r  "$sikuliScript" --args None $zipSrc $zipDst
-    if (($strResponse = Read-Host "Sikuli Done? (Y/N)") -ine "N") {
-        cp $downloadZip $ZipDst
-        & "$winrar" e "$zipDst" "$sysDir"
-        open $srcDir
-        if (($strResponse = Read-Host "Enter the file name to archive('q' to quit):") -ine "N") {
-            $zipSrc = $srcDir + $strResponse + ".zip"
-            & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
-        }
+    #& "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
+    Write-Zip "$sysDir\*" $zipSrc 
+
+    StartSMSOTP -User kordan -Password $passwd -SrcZipFile $zipSrc -OutDir $zipDst
+
+    if ($args.length -lt 2) {
+        & "$winrar" x "$zipDst" *.* "H:\$filename\" 
+    } else {
+        & "$winrar" x "$zipDst" *.* "H:\" + $args[1] + "\" 
     }
+#    & "$sikuliIDE" -r  "$sikuliScript" --args None $zipSrc $zipDst
+#    if (($strResponse = Read-Host "Sikuli Done? (Y/N)") -ine "N") {
+#        cp $downloadZip $ZipDst
+#        & "$winrar" e "$zipDst" "$sysDir"
+#        open $srcDir
+#        if (($strResponse = Read-Host "Enter the file name to archive('q' to quit):") -ine "N") {
+#            $zipSrc = $srcDir + $strResponse + ".zip"
+#            & "$winrar" a -afzip -m3 -ed  "$zipSrc" "$sysDir"
+#        }
+#    }
 }
 
 function notify
