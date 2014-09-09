@@ -240,9 +240,9 @@ function CheckDriverBinary($driver, $type)
 {
     if ($type)  {
         $type = ""
-        $x86_PCIE = "$driver\RTLWlanE_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlane$type.sys"
-        $x86_USB  = "$driver\RTLWlanU_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlanu$type.sys"
-        $x86_SDIO = "$driver\RTLWlanS_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlans$type.sys"
+        $x86_PCIE = "$driver\RTLWlanE_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlane$type`_XP.sys"
+        $x86_USB  = "$driver\RTLWlanU_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlanu$type`_XP.sys"
+        $x86_SDIO = "$driver\RTLWlanS_WindowsDriver_(WithSymbol)\WinXP_2K\rtwlans$type`_XP.sys"
         $x64_PCIE = "$driver\RTLWlanE_WindowsDriver_(WithSymbol)\Win7\X64\rtwlane$type.sys"
         $x64_USB  = "$driver\RTLWlanU_WindowsDriver_(WithSymbol)\Win7\X64\rtwlanu$type.sys"
         $x64_SDIO = "$driver\RTLWlanS_WindowsDriver_(WithSymbol)\Win7\X64\rtwlans$type.sys"
@@ -432,7 +432,11 @@ Import-Module SMSOTP
 function SignOnSMSOTP
 {
     $winrar = "C:\Program Files\WinRAR\winrar.exe"
-    $filename = "signed" + (get-date -format "yyyyMMhhmm-ss")
+    if ($args.length -lt 2) {
+        $filename = "signed" + (get-date -format "yyyyMMhhmm-ss")
+    } else {
+        $filename = $args[1] 
+    }
     $zipName = "$filename.zip"
     $sysDir = $args[0]
     $srcDir = $args[0]+"\..\..\"
@@ -451,11 +455,7 @@ function SignOnSMSOTP
 
     StartSMSOTP -User kordan -Password $passwd -SrcZipFile $zipSrc -OutDir $zipDst
 
-    if ($args.length -lt 2) {
-        & "$winrar" x "$zipDst" *.* "H:\$filename\" 
-    } else {
-        & "$winrar" x "$zipDst" *.* "H:\" + $args[1] + "\" 
-    }
+    & "$winrar" x "$zipDst" *.* "H:\$filename\" 
 #    & "$sikuliIDE" -r  "$sikuliScript" --args None $zipSrc $zipDst
 #    if (($strResponse = Read-Host "Sikuli Done? (Y/N)") -ine "N") {
 #        cp $downloadZip $ZipDst
@@ -499,6 +499,11 @@ function notify
     }
 }
 
+function grs
+{
+    python "C:\Users\Kordan\Dropbox\Realtek\Utility\grs-0.6.1\grs\GetStockWeight.py"
+}
+
 Remove-Item alias:ls
 Remove-Item alias:gl -Force
 set-alias open explorer
@@ -522,6 +527,7 @@ Set-Alias cd  C:\Users\Kordan\Documents\WindowsPowerShell\Change-Directory.ps1
 Set-Alias mpm C:\MassProductionKit\MPPackageManager\MPManager.ps1
 
 $global:TRUNK = "C:\WLAN\Trunk.git"
+$global:PF = "C:\WLAN\NAN-PF\UCC\bin"
 $global:IMG = "C:\MassProductionKit\Image2Header"
 $global:POWERSH = "C:\Users\Kordan\Documents\WindowsPowerShell"
 $global:RTK = "C:\WLAN"
