@@ -517,7 +517,7 @@ function grs
     python "C:\Users\Kordan\Dropbox\Realtek\Utility\grs-0.6.1\grs\GetStockWeight.py"
 }
 
-Remove-Item alias:ls
+#Remove-Item alias:ls
 Remove-Item alias:gl -Force
 set-alias open explorer
 set-alias vi vim
