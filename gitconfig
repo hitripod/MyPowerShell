@@ -1,8 +1,8 @@
 [gui]
-	recentrepo = C:/Program Files (x86)/Vim/vim72/新增資料
+    #recentrepo = C:\vim73-x64\vim73\新增資料
 [user]
-	email = kordan@realtek.com
-	name = Kordan
+	email = kordan@360.cn
+	name = Kordan Ou
 [svn]
 	pushmergeinfo = false
 [alias]
